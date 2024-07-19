@@ -1,113 +1,125 @@
-import Image from "next/image";
+"use client";
+import React from 'react';
+import { useForm, SubmitHandler } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { serverCall } from './actions/saveData';
+import Link from 'next/link';
 
-export default function Home() {
+const schoolSchema = z.object({
+  name: z.string().nonempty({ message: 'School name is required' }),
+  address: z.string().nonempty({ message: 'Address is required' }),
+  city: z.string().nonempty({ message: 'City is required' }),
+  state: z.string().nonempty({ message: 'State is required' }),
+  contact: z.string()
+    .nonempty({ message: 'Contact is required' })
+    .regex(/^[0-9]+$/, { message: 'Contact must be a number' }),
+  email: z.string().nonempty({ message: 'Email is required' }).email({ message: 'Email must be a valid email address' }),
+});
+
+export type FormData = z.infer<typeof schoolSchema>;
+
+
+
+const SchoolForm: React.FC = () => {
+  const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
+    resolver: zodResolver(schoolSchema),
+  });
+
+  const onSubmit: SubmitHandler<FormData> = async(data) => {
+    console.log(data);
+    const ans = await serverCall(data)
+    console.log(ans)
+    if(!!ans)
+      alert("Data Saved Successfully")
+    else
+      alert("Data not saved")
+    
+  };
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:size-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
+    <div className="flex justify-center items-center h-screen bg-gray-100">
+      <div className="max-w-md w-full mx-auto p-6 bg-white shadow-md rounded-md border border-gray-200">
+      <Link href="/view" className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+            See School Lists
+          </Link>
+        <h1 className="text-2xl font-bold mb-4 text-center text-gray-800">SCHOOLERP - School Form</h1>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div>
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700">School Name</label>
+            <input
+              type="text"
+              id="name"
+              {...register('name')}
+              className={`mt-1 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md ${errors.name ? 'border-red-500' : ''} text-black bg-gray-50`}
             />
-          </a>
-        </div>
+            {errors.name && <span className="text-red-500 text-sm">{errors.name.message}</span>}
+          </div>
+
+          <div>
+            <label htmlFor="address" className="block text-sm font-medium text-gray-700">Address</label>
+            <input
+              type="text"
+              id="address"
+              {...register('address')}
+              className={`mt-1 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md ${errors.address ? 'border-red-500' : ''} text-black bg-gray-50`}
+            />
+            {errors.address && <span className="text-red-500 text-sm">{errors.address.message}</span>}
+          </div>
+
+          <div>
+            <label htmlFor="city" className="block text-sm font-medium text-gray-700">City</label>
+            <input
+              type="text"
+              id="city"
+              {...register('city')}
+              className={`mt-1 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md ${errors.city ? 'border-red-500' : ''} text-black bg-gray-50`}
+            />
+            {errors.city && <span className="text-red-500 text-sm">{errors.city.message}</span>}
+          </div>
+
+          <div>
+            <label htmlFor="state" className="block text-sm font-medium text-gray-700">State</label>
+            <input
+              type="text"
+              id="state"
+              {...register('state')}
+              className={`mt-1 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md ${errors.state ? 'border-red-500' : ''} text-black bg-gray-50`}
+            />
+            {errors.state && <span className="text-red-500 text-sm">{errors.state.message}</span>}
+          </div>
+
+          <div>
+            <label htmlFor="contact" className="block text-sm font-medium text-gray-700">Contact</label>
+            <input
+              type="text"
+              id="contact"
+              {...register('contact')}
+              className={`mt-1 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md ${errors.contact ? 'border-red-500' : ''} text-black bg-gray-50`}
+            />
+            {errors.contact && <span className="text-red-500 text-sm">{errors.contact.message}</span>}
+          </div>
+
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
+            <input
+              type="email"
+              id="email"
+              {...register('email')}
+              className={`mt-1 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md ${errors.email ? 'border-red-500' : ''} text-black bg-gray-50`}
+            />
+            {errors.email && <span className="text-red-500 text-sm">{errors.email.message}</span>}
+          </div>
+
+          <div className="text-center">
+            <button type="submit" className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+              Submit
+            </button>
+          </div>
+        </form>
       </div>
-
-      <div className="relative z-[-1] flex place-items-center before:absolute before:h-[300px] before:w-full before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 sm:before:w-[480px] sm:after:w-[240px] before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Explore starter templates for Next.js.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-balance text-sm opacity-50">
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+    </div>
   );
-}
+};
+
+export default SchoolForm;
